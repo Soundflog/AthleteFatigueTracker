@@ -17,17 +17,13 @@ import java.util.List;
 public class PhysiologicalMetricService {
 
     private final PhysiologicalMetricRepository metricRepository;
+    private final FatigueService fatigueService;
 
     /**
      * Сохранение физиологических данных для текущего пользователя (athleteId берётся из Principal).
      */
     @Transactional
     public PhysiologicalMetric saveMetric(Long athleteId, PhysiologicalMetricDto dto) {
-        // Простейшая валидация: проверка пользователя
-        if (athleteId == null || athleteId <= 0) {
-            throw new ResourceNotFoundException("Некорректный идентификатор спортсмена");
-        }
-
         PhysiologicalMetric entity = PhysiologicalMetric.builder()
                 .athleteId(athleteId)
                 .recordedAt(dto.getRecordedAt())
@@ -39,7 +35,13 @@ public class PhysiologicalMetricService {
                 .subjectiveFatigue(dto.getSubjectiveFatigue())
                 .build();
 
-        return metricRepository.save(entity);
+        PhysiologicalMetric saved = metricRepository.save(entity);
+
+        // Асинхронно вызываем ML-сервис и сохраняем прогноз
+        fatigueService.analyzeAndSave(saved)
+                .subscribe(); // или .block() если нужен синхронный вызов
+
+        return saved;
     }
 
     public List<PhysiologicalMetric> getMetricsForAthlete(Long athleteId) {
