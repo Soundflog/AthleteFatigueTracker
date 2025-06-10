@@ -31,8 +31,12 @@ public class FatiguePrediction {
     @Column(name = "fatigue_category", length = 20, nullable = false)
     private String fatigueCategory;
 
+    @Column(name = "alert_sent", nullable = false)
+    private boolean alertSent;    // флаг, что уведомление уже отправлено
+
     @PrePersist
     protected void onCreate() {
         predictionTimestamp = LocalDateTime.now();
+        alertSent = false;
     }
 }

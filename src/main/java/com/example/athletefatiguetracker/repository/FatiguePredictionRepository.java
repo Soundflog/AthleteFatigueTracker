@@ -13,4 +13,6 @@ public interface FatiguePredictionRepository extends JpaRepository<FatiguePredic
 
     List<FatiguePrediction> findByAthleteIdAndPredictionTimestampBetween(
             Long athleteId, LocalDateTime from, LocalDateTime to);
+
+    List<FatiguePrediction> findByAthleteId(Long athleteId);
 }
