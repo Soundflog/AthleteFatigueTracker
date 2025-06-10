@@ -4,6 +4,7 @@ import com.example.athletefatiguetracker.dto.PhysiologicalMetricDto;
 import com.example.athletefatiguetracker.entity.PhysiologicalMetric;
 import com.example.athletefatiguetracker.exception.ResourceNotFoundException;
 import com.example.athletefatiguetracker.repository.PhysiologicalMetricRepository;
+import com.example.athletefatiguetracker.service.inter.IFatiguePredictionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import java.util.List;
 public class PhysiologicalMetricService {
 
     private final PhysiologicalMetricRepository metricRepository;
-    private final FatiguePredictionService fatiguePredictionService;
+    private final IFatiguePredictionService fatiguePredictionService;
 
     /**
      * Сохранение физиологических данных для текущего пользователя (athleteId берётся из Principal).

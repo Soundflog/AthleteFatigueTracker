@@ -4,6 +4,7 @@ import com.example.athletefatiguetracker.entity.FatiguePrediction;
 import com.example.athletefatiguetracker.entity.PhysiologicalMetric;
 import com.example.athletefatiguetracker.exception.ResourceNotFoundException;
 import com.example.athletefatiguetracker.repository.FatiguePredictionRepository;
+import com.example.athletefatiguetracker.service.inter.IFatiguePredictionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class FatiguePredictionService {
+public class FatiguePredictionService implements IFatiguePredictionService {
 
     private final FatigueAnalysisClient client;
     private final FatiguePredictionRepository predictionRepository;
@@ -24,6 +25,7 @@ public class FatiguePredictionService {
      * Отправляет данные в ML-сервис, получает прогноз и сохраняет его.
      * Возвращает только что сохранённый прогноз.
      */
+    @Override
     public Mono<FatiguePrediction> analyzeAndSave(PhysiologicalMetric metric) {
         return client.predict(metric)
                 .map(resp -> FatiguePrediction.builder()
@@ -39,6 +41,7 @@ public class FatiguePredictionService {
     /**
      * Возвращает идентификаторы всех спортсменов, у которых есть хотя бы один прогноз.
      */
+    @Override
     public List<Long> findAllAthleteIds() {
         return predictionRepository.findAll().stream()
                 .map(FatiguePrediction::getAthleteId)
@@ -50,6 +53,7 @@ public class FatiguePredictionService {
      * Возвращает самый последний прогноз для данного спортсмена.
      * @throws ResourceNotFoundException если нет ни одного прогноза
      */
+    @Override
     public FatiguePrediction getLatestForAthlete(Long athleteId) {
         return predictionRepository.findByAthleteIdOrderByPredictionTimestampDesc(athleteId).stream()
                 .findFirst()
@@ -62,6 +66,7 @@ public class FatiguePredictionService {
      * @param athleteId  ID спортсмена
      * @param prediction Последний прогноз
      */
+    @Override
     public boolean wasAlerted(Long athleteId, FatiguePrediction prediction) {
         // Можно дополнительно проверять, что prediction.athleteId == athleteId
         return prediction.isAlertSent();
@@ -70,6 +75,7 @@ public class FatiguePredictionService {
     /**
      * Отмечает, что по данной записи уже отправлено уведомление.
      */
+    @Override
     @Transactional
     public void markAlertSent(Long athleteId, FatiguePrediction prediction) {
         FatiguePrediction entity = predictionRepository.findById(prediction.getPredictionId())
@@ -82,6 +88,7 @@ public class FatiguePredictionService {
     /**
      * Поиск всех прогнозов спортсмена (опционально).
      */
+    @Override
     public List<FatiguePrediction> getAllForAthlete(Long athleteId) {
         return predictionRepository.findByAthleteIdOrderByPredictionTimestampDesc(athleteId);
     }
