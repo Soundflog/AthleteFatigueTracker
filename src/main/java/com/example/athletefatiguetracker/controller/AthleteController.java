@@ -3,7 +3,7 @@ package com.example.athletefatiguetracker.controller;
 import com.example.athletefatiguetracker.dto.AthleteDto;
 import com.example.athletefatiguetracker.dto.UpdateAthleteDto;
 import com.example.athletefatiguetracker.entity.Athlete;
-import com.example.athletefatiguetracker.service.AthleteService;
+import com.example.athletefatiguetracker.service.inter.IAthleteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,13 +13,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/athlete")
 @RequiredArgsConstructor
 public class AthleteController {
 
-    private final AthleteService athleteService;
+    private final IAthleteService athleteService;
 
     /**
      * Создать новый профиль спортсмена.
@@ -33,7 +34,7 @@ public class AthleteController {
             Authentication authentication) {
 
         // Если требуется связать профили: Long userId = Long.valueOf(authentication.getName());
-        Athlete created = athleteService.createAthlete(null, dto);
+        Athlete created = athleteService.createAthlete(dto);
         return ResponseEntity
                 .created(URI.create("/api/v1/athlete/" + created.getAthleteId()))
                 .body(created);
@@ -76,6 +77,11 @@ public class AthleteController {
     public ResponseEntity<Void> deleteAthlete(@PathVariable("id") Long athleteId) {
         athleteService.deleteAthlete(athleteId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Athlete>> list() {
+        return ResponseEntity.ok(athleteService.listAthletes());
     }
 }
 

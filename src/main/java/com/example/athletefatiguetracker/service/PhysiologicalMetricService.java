@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,7 +15,7 @@ import java.util.List;
 public class PhysiologicalMetricService {
 
     private final PhysiologicalMetricRepository metricRepository;
-    private final FatigueService fatigueService;
+    private final FatiguePredictionService fatiguePredictionService;
 
     /**
      * Сохранение физиологических данных для текущего пользователя (athleteId берётся из Principal).
@@ -38,7 +36,7 @@ public class PhysiologicalMetricService {
         PhysiologicalMetric saved = metricRepository.save(entity);
 
         // Асинхронно вызываем ML-сервис и сохраняем прогноз
-        fatigueService.analyzeAndSave(saved)
+        fatiguePredictionService.analyzeAndSave(saved)
                 .subscribe(); // или .block() если нужен синхронный вызов
 
         return saved;
