@@ -2,7 +2,7 @@ package com.example.athletefatiguetracker.controller;
 
 import com.example.athletefatiguetracker.dto.FatigueThresholdDto;
 import com.example.athletefatiguetracker.entity.FatigueThreshold;
-import com.example.athletefatiguetracker.service.FatigueThresholdService;
+import com.example.athletefatiguetracker.service.inter.IFatigueThresholdService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FatigueThresholdController {
 
-    private final FatigueThresholdService service;
+    private final IFatigueThresholdService service;
 
     @Operation(summary = "Получить все пороги усталости")
     @GetMapping
