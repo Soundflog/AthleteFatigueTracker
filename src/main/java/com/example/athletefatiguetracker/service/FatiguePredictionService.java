@@ -5,6 +5,7 @@ import com.example.athletefatiguetracker.entity.PhysiologicalMetric;
 import com.example.athletefatiguetracker.exception.ResourceNotFoundException;
 import com.example.athletefatiguetracker.repository.FatiguePredictionRepository;
 import com.example.athletefatiguetracker.service.inter.IFatiguePredictionService;
+import com.example.athletefatiguetracker.service.inter.IPredictionListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FatiguePredictionService implements IFatiguePredictionService {
 
+    private final List<IPredictionListener> listeners;
     private final FatigueAnalysisClient client;
     private final FatiguePredictionRepository predictionRepository;
 
@@ -28,14 +30,27 @@ public class FatiguePredictionService implements IFatiguePredictionService {
     @Override
     public Mono<FatiguePrediction> analyzeAndSave(PhysiologicalMetric metric) {
         return client.predict(metric)
+                // создаём сущность прогноза
                 .map(resp -> FatiguePrediction.builder()
                         .athleteId(metric.getAthleteId())
                         .fatigueIndex(resp.getFatigueIndex())
                         .fatigueCategory(resp.getCategory())
                         .build())
+                // сохраняем её в БД на boundedElastic()
                 .flatMap(p -> Mono.fromCallable(() -> predictionRepository.save(p))
-                        .subscribeOn(Schedulers.boundedElastic())
-                );
+                        .subscribeOn(Schedulers.boundedElastic()))
+                // после успешного сохранения вызываем всех слушателей
+                .doOnSuccess(saved -> {
+                    for (IPredictionListener listener : listeners) {
+                        try {
+                            listener.onNewPrediction(saved);
+                        } catch (Exception ex) {
+                            // логируем, но не разрываем поток
+                            System.out.printf("An error occurred while processing prediction: %s\n", saved.getPredictionId());
+                            //logger.error("Listener {} failed for prediction {}", listener, saved.getPredictionId(), ex);
+                        }
+                    }
+                });
     }
 
     /**
