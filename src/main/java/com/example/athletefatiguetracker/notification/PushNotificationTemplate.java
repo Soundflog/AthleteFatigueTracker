@@ -1,4 +1,4 @@
-package com.example.athletefatiguetracker.service.template;
+package com.example.athletefatiguetracker.notification;
 
 import com.example.athletefatiguetracker.entity.NotificationType;
 import com.example.athletefatiguetracker.repository.NotificationRepository;

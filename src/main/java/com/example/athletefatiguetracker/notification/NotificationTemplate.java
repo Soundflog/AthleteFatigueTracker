@@ -1,9 +1,8 @@
-package com.example.athletefatiguetracker.service.template;
+package com.example.athletefatiguetracker.notification;
 
 import com.example.athletefatiguetracker.entity.Notification;
 import com.example.athletefatiguetracker.entity.NotificationType;
 import com.example.athletefatiguetracker.repository.NotificationRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -20,7 +19,7 @@ public abstract class NotificationTemplate {
      * Основной метод-шаблон: валидация → отправка → сохранение в БД.
      */
     @Transactional
-    public final void notify(Long athleteId, String message) {
+    public void notify(Long athleteId, String message) {
         validate(athleteId, message);
         send(athleteId, message);
         log(athleteId, message);
