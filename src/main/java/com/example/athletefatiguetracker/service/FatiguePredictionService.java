@@ -5,7 +5,7 @@ import com.example.athletefatiguetracker.entity.PhysiologicalMetric;
 import com.example.athletefatiguetracker.exception.ResourceNotFoundException;
 import com.example.athletefatiguetracker.repository.FatiguePredictionRepository;
 import com.example.athletefatiguetracker.service.inter.IFatiguePredictionService;
-import com.example.athletefatiguetracker.service.inter.IPredictionListener;
+import com.example.athletefatiguetracker.observer.IPredictionListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
