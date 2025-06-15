@@ -1,0 +1,40 @@
+@startuml
+actor Client
+participant "FatiguePredictionService" as FPS
+participant "FatigueAnalysisClient" as ML
+participant "FatiguePredictionRepository" as Repo
+participant "IPredictionListener[]" as Listeners
+participant "NotificationTemplate" as Template
+participant "NotificationRepository" as NRepo
+
+Client -> FPS : analyzeAndSave(metric)
+activate FPS
+
+FPS -> ML : predict(metric)
+activate ML
+ML --> FPS : Mono<FatigueResponse>
+deactivate ML
+
+FPS -> Repo : save(new FatiguePrediction)
+activate Repo
+Repo --> FPS : savedPrediction
+deactivate Repo
+
+FPS -> Listeners : doOnSuccess(savedPrediction)
+activate Listeners
+
+Listeners -> Template : notify(athleteId, message)
+activate Template
+Template -> NRepo : save(Notification)
+activate NRepo
+NRepo --> Template : savedNotification
+deactivate NRepo
+Template --> Listeners : (return)
+deactivate Template
+
+Listeners --> FPS : (return)
+deactivate Listeners
+
+FPS --> Client : Mono<FatiguePrediction>
+deactivate FPS
+@enduml

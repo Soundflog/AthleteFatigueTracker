@@ -1,0 +1,97 @@
+@startuml
+
+' Интерфейсы
+interface IPredictionListener {
+  + onNewPrediction(pred: FatiguePrediction)
+}
+
+interface IFatiguePredictionService {
+  + analyzeAndSave(metric: PhysiologicalMetric): Mono<FatiguePrediction>
+}
+
+interface INotificationService {
+  + create(dto: NotificationDto): NotificationResponseDto
+  + getForAthlete(Long athleteId): List<NotificationResponseDto>
+  + markAsRead(Long notificationId): void
+}
+
+' Сущности и репозитории
+class FatiguePrediction {
+  - Long predictionId
+  - Long athleteId
+  - Double fatigueIndex
+  - String fatigueCategory
+  - boolean alertSent
+}
+
+class Notification {
+  - Long notificationId
+  - Long athleteId
+  - NotificationType type
+  - String message
+  - LocalDateTime createdAt
+  - boolean read
+}
+
+interface FatiguePredictionRepository extends JpaRepository
+interface NotificationRepository{
+ + findByAthleteIdOrderByCreatedAtDesc(Long athleteId): List<Notification>
+}
+
+' Сервисы
+class FatiguePredictionService {
+  + analyzeAndSave(metric: PhysiologicalMetric): Mono<FatiguePrediction>
+  + findAllAthleteIds(): List<Long>
+  + getLatestForAthlete(id: Long): FatiguePrediction
+  + wasAlerted(...): boolean
+  + markAlertSent(...): void
+}
+
+class NotificationService {
+  + create(dto: NotificationDto): NotificationResponseDto
+  + getForAthlete(Long athleteId): List<NotificationResponseDto>
+  + markAsRead(Long notificationId): void
+}
+
+abstract class NotificationTemplate {
+  + notify(athleteId: Long, message: String)
+  # validate(Long athleteId, String message)
+  # send(Long athleteId, String message)
+  # getNotificationType(): NotificationType
+  - log(Long athleteId, String message)
+}
+
+class EmailNotificationTemplate{
+  # validate(Long athleteId, String message)
+  # send(Long athleteId, String message)
+  # getNotificationType(): NotificationType
+}
+class PushNotificationTemplate{
+  # validate(Long athleteId, String message)
+  # send(Long athleteId, String message)
+  # getNotificationType(): NotificationType
+}
+class AlertNotificationListener{
+  - {static} THRESHOLD : 0.7
+  + onNewPrediction(FatiguePrediction pred): void
+}
+
+' Связи
+FatiguePredictionService ..|> IFatiguePredictionService
+NotificationService ..|> INotificationService
+
+FatiguePredictionService --> FatiguePredictionRepository
+NotificationService --> NotificationRepository
+
+FatiguePredictionService --> IPredictionListener
+AlertNotificationListener ..|> IPredictionListener
+
+NotificationTemplate ..> NotificationRepository
+EmailNotificationTemplate --|> NotificationTemplate
+PushNotificationTemplate --|> NotificationTemplate
+
+AlertNotificationListener --> NotificationTemplate
+
+skinparam dpi 100
+scale max 500 width
+@enduml
