@@ -1,4 +1,4 @@
-package com.example.athletefatiguetracker.service.inter;
+package com.example.athletefatiguetracker.observer;
 
 import com.example.athletefatiguetracker.entity.FatiguePrediction;
 

@@ -1,9 +1,8 @@
-package com.example.athletefatiguetracker.service.listener;
+package com.example.athletefatiguetracker.observer;
 
 import com.example.athletefatiguetracker.entity.FatiguePrediction;
-import com.example.athletefatiguetracker.service.inter.IPredictionListener;
-import com.example.athletefatiguetracker.service.template.EmailNotificationTemplate;
-import com.example.athletefatiguetracker.service.template.PushNotificationTemplate;
+import com.example.athletefatiguetracker.notification.EmailNotificationTemplate;
+import com.example.athletefatiguetracker.notification.PushNotificationTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
